@@ -52,14 +52,14 @@ helm repo update
 
 echo "Installing PostgreSQL (Bitnami)..."
 helm upgrade --install supabase-postgres bitnami/postgresql -n supabase -f "$MANIFESTS_DIR/postgres-values.yaml" \
-  --set postgresql.postgresqlPassword="${POSTGRES_PASSWORD}" --wait
+  --set postgresql.postgresqlPassword="${POSTGRES_PASSWORD}" --wait --timeout=5m
 
 echo "Installing MinIO..."
 helm upgrade --install supabase-minio minio/minio -n supabase -f "$MANIFESTS_DIR/minio-values.yaml" \
-  --set accessKey="${MINIO_ACCESS_KEY}",secretKey="${MINIO_SECRET_KEY}" --wait
+  --set accessKey="${MINIO_ACCESS_KEY}",secretKey="${MINIO_SECRET_KEY}" --wait --timeout=10m
 
 echo "Installing Kong (gateway)..."
-helm upgrade --install supabase-kong kong/kong -n supabase -f "$MANIFESTS_DIR/kong-values.yaml" --wait
+helm upgrade --install supabase-kong kong/kong -n supabase -f "$MANIFESTS_DIR/kong-values.yaml" --wait --timeout=5m
 
 echo "Deploying Supabase services and ClusterIP services..."
 kubectl apply -k "$MANIFESTS_DIR/"

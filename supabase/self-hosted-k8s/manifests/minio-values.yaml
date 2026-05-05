@@ -1,4 +1,6 @@
 # Example Helm values for MinIO (for Supabase Storage)
+image:
+  tag: "RELEASE.2024-01-11T07-46-16Z"  # Pinned version instead of rolling 'latest'
 accessKey: minioaccesskey12345
 secretKey: miniosecretkey9Z8y7X6w5V4u3T2s
 persistence:
@@ -7,6 +9,14 @@ persistence:
   storageClass: ""
 resources:
   requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
     memory: 1Gi
     cpu: 500m
 replicas: 1
+job:
+  annotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

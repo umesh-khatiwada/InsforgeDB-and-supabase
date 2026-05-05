@@ -1,5 +1,7 @@
 # Example Helm values for Kong (API gateway / proxy)
 # Adjust admin credentials and proxy settings for your environment
+image:
+  tag: "3.4-alpine"  # Pinned version instead of rolling 'latest'
 proxy:
   type: LoadBalancer
   http:
@@ -14,3 +16,11 @@ admin:
 
 env:
   database: "off" # use DB-less mode or configure Postgres if desired
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
