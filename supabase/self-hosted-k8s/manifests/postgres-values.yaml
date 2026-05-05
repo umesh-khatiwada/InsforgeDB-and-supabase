@@ -1,0 +1,16 @@
+# Example Helm values for Bitnami PostgreSQL
+# Customize storageClass, resources, and credentials for production
+global:
+  postgresql:
+    postgresqlPassword: <POSTGRES_PASSWORD>
+    postgresqlDatabase: supabase
+    postgresqlUsername: supabase
+primary:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: ""
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false

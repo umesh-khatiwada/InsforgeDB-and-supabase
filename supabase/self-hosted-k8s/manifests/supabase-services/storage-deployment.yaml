@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storage
+  namespace: supabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: storage
+  template:
+    metadata:
+      labels:
+        app: storage
+    spec:
+      containers:
+        - name: storage-worker
+          image: supabase/storage:latest
+          env:
+            - name: MINIO_ENDPOINT
+              value: "http://supabase-minio:9000"
+            - name: MINIO_ACCESS_KEY
+              value: "<MINIO_ACCESS_KEY>"
+            - name: MINIO_SECRET_KEY
+              value: "<MINIO_SECRET_KEY>"
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,6 @@
+resources:
+  - namespace.yaml
+  - postgres-values.yaml
+  - minio-values.yaml
+  - kong-values.yaml
+  - supabase-services/

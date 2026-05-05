@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime
+  namespace: supabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: realtime
+  template:
+    metadata:
+      labels:
+        app: realtime
+    spec:
+      containers:
+        - name: realtime
+          image: supabase/realtime:latest
+          env:
+            - name: DB_HOST
+              value: "supabase-postgres"
+            - name: DB_NAME
+              value: "supabase"
+            - name: DB_USER
+              value: "supabase"
+            - name: DB_PASSWORD
+              value: "<POSTGRES_PASSWORD>"
+          ports:
+            - containerPort: 4000

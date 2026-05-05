@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gotrue
+  namespace: supabase
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gotrue
+  template:
+    metadata:
+      labels:
+        app: gotrue
+    spec:
+      containers:
+        - name: gotrue
+          image: supabase/gotrue:latest
+          env:
+            - name: GOTRUE_SITE_URL
+              value: "https://<YOUR_DOMAIN>"
+            - name: GOTRUE_DB_DRIVER
+              value: "postgres"
+            - name: GOTRUE_DB_DATABASE_URL
+              value: "postgres://supabase:<POSTGRES_PASSWORD>@supabase-postgres:5432/supabase"
+          ports:
+            - containerPort: 9999

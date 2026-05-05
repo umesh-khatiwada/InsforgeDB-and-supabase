@@ -1,0 +1,16 @@
+# Example Helm values for Kong (API gateway / proxy)
+# Adjust admin credentials and proxy settings for your environment
+proxy:
+  type: LoadBalancer
+  http:
+    enabled: true
+  tls:
+    enabled: false
+
+admin:
+  enabled: true
+  http:
+    enabled: true
+
+env:
+  database: "off" # use DB-less mode or configure Postgres if desired
