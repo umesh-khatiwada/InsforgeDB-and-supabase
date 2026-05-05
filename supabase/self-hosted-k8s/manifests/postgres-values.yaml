@@ -7,7 +7,7 @@ global:
     postgresqlUsername: supabase
 primary:
   persistence:
-    enabled: false
+    enabled: true
     size: 10Gi
     storageClass: ""
 metrics:

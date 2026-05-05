@@ -58,3 +58,24 @@ Files in this folder are templates — after you review them I can:
 - Fill in production-ready values (secrets, TLS) and generate Kubernetes Secrets
 - Convert templates to HelmRelease manifests for Flux/ArgoCD
 - Add example Postgres initialization and migrations
+
+## Quick automated deploy
+
+There is a `deploy.sh` script that automates creating the namespace, installing cert-manager (if missing), installing PostgreSQL, MinIO and Kong via Helm, and applying the example Supabase service manifests and Ingress.
+
+Run:
+
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+Notes:
+
+- The script uses a self-signed Issuer via `cert-manager` to generate a TLS secret for `supabase.local`.
+- For local access, add an `/etc/hosts` entry pointing `supabase.local` to your cluster IP (e.g. `minikube ip`).
+- These templates are for quick staging/demo use; review secrets, storage settings, and resource limits before production.
+
+Secrets note:
+
+- The repository contains `manifests/secrets.yaml` as an example only. The `deploy.sh` script will generate strong random secrets at runtime and create the `supabase-secrets` Secret in the `supabase` namespace. `secrets.yaml` is not applied by the kustomize overlay to avoid overwriting generated secrets.
