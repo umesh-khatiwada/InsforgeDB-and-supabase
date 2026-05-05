@@ -4,8 +4,70 @@ set -uo pipefail  # Don't exit on error immediately; allow cleanup
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFESTS_DIR="$ROOT_DIR/manifests"
 
+# Usage
+usage() {
+  cat <<EOF
+Usage: $0 [COMMAND]
+
+Commands:
+  install    Install Supabase stack (default)
+  uninstall  Remove all Supabase services and namespace
+  status     Check status of all services
+
+Examples:
+  $0 install
+  $0 uninstall
+  $0 status
+EOF
+  exit 0
+}
+
+# Default command
+COMMAND="${1:-install}"
+
+case "$COMMAND" in
+  install|uninstall|status)
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    echo "Unknown command: $COMMAND"
+    usage
+    ;;
+esac
+
 # Trap errors and exit cleanly
-trap 'echo "\nDeployment interrupted. Releases are still active. To clean up, run:\n  helm uninstall supabase-postgres supabase-minio supabase-kong -n supabase\nThen retry the script." >&2' EXIT
+trap 'echo "\nOperation interrupted or failed. State may be inconsistent." >&2' EXIT
+
+if [ "$COMMAND" = "uninstall" ]; then
+  echo "🗑️  Uninstalling Supabase stack..."
+  echo "Removing Helm releases..."
+  helm uninstall supabase-postgres supabase-minio supabase-kong -n supabase 2>/dev/null || echo "  (some releases may not exist)"
+  
+  echo "Removing Kubernetes manifests and secrets..."
+  kubectl delete -k "$MANIFESTS_DIR" -n supabase 2>/dev/null || true
+  
+  echo "Removing namespace..."
+  kubectl delete namespace supabase 2>/dev/null || echo "  (namespace may not exist)"
+  
+  echo "✅ Uninstall complete."
+  exit 0
+fi
+
+if [ "$COMMAND" = "status" ]; then
+  echo "📊 Supabase stack status:"
+  echo ""
+  echo "Helm releases:"
+  helm list -n supabase 2>/dev/null || echo "  (no releases found)"
+  echo ""
+  echo "Pods:"
+  kubectl get pods -n supabase 2>/dev/null || echo "  (namespace may not exist)"
+  echo ""
+  echo "Services:"
+  kubectl get svc -n supabase 2>/dev/null || echo "  (no services found)"
+  exit 0
+fi
 
 echo "Generating secrets and creating namespace..."
 echo "Generating strong random secrets and creating Kubernetes Secret..."
@@ -91,11 +153,16 @@ kubectl -n supabase rollout status deployment/storage --timeout=120s || true
 echo "Applying Ingress..."
 kubectl apply -f "$MANIFESTS_DIR/ingress.yaml"
 
-echo "All done. To access the stack locally, map 'supabase.local' to your cluster IP (e.g. minikube ip) in /etc/hosts."
-
-echo "Example:"
-if command -v minikube >/dev/null 2>&1; then
-  echo "  sudo -- sh -c \"echo \"$(minikube ip) supabase.local\" >> /etc/hosts\""
-fi
-
-echo "Deployed."
+echo "Deployed. ✅"
+echo ""
+echo "Next steps:"
+echo "  1. Check status: $0 status"
+echo "  2. Map 'supabase.local' to your cluster IP in /etc/hosts"
+echo "     Example (minikube): sudo sh -c \"echo '$(minikube ip) supabase.local' >> /etc/hosts\""
+echo "  3. Access services:"
+echo "     - PostgREST: http://supabase.local/rest"
+echo "     - GoTrue Auth: http://supabase.local/auth"
+echo "     - Realtime: ws://supabase.local/realtime"
+echo "     - Storage: http://supabase.local/storage"
+echo ""
+echo "To uninstall: $0 uninstall"
