@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail  # Don't exit on error immediately; allow cleanup
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MANIFESTS_DIR="$ROOT_DIR/manifests"
+
+# Trap errors and exit cleanly
+trap 'echo "\nDeployment interrupted. Releases are still active. To clean up, run:\n  helm uninstall supabase-postgres supabase-minio supabase-kong -n supabase\nThen retry the script." >&2' EXIT
 
 echo "Generating secrets and creating namespace..."
 echo "Generating strong random secrets and creating Kubernetes Secret..."
@@ -51,15 +54,30 @@ helm repo add kong https://charts.konghq.com || true
 helm repo update
 
 echo "Installing PostgreSQL (Bitnami)..."
+if helm list -n supabase | grep -q supabase-postgres; then
+  echo "  PostgreSQL release exists, upgrading..."
+else
+  echo "  Creating new PostgreSQL release..."
+fi
 helm upgrade --install supabase-postgres bitnami/postgresql -n supabase -f "$MANIFESTS_DIR/postgres-values.yaml" \
-  --set postgresql.postgresqlPassword="${POSTGRES_PASSWORD}" --wait --timeout=5m
+  --set postgresql.postgresqlPassword="${POSTGRES_PASSWORD}" --wait --timeout=5m || { echo "PostgreSQL install failed. Check logs: kubectl logs -n supabase deploy/supabase-postgres"; exit 1; }
 
 echo "Installing MinIO..."
+if helm list -n supabase | grep -q supabase-minio; then
+  echo "  MinIO release exists, upgrading..."
+else
+  echo "  Creating new MinIO release..."
+fi
 helm upgrade --install supabase-minio minio/minio -n supabase -f "$MANIFESTS_DIR/minio-values.yaml" \
-  --set accessKey="${MINIO_ACCESS_KEY}",secretKey="${MINIO_SECRET_KEY}" --wait --timeout=10m
+  --set accessKey="${MINIO_ACCESS_KEY}",secretKey="${MINIO_SECRET_KEY}" --wait --timeout=10m || { echo "MinIO install failed. Check logs: kubectl logs -n supabase job/supabase-minio-post-job"; exit 1; }
 
 echo "Installing Kong (gateway)..."
-helm upgrade --install supabase-kong kong/kong -n supabase -f "$MANIFESTS_DIR/kong-values.yaml" --wait --timeout=5m
+if helm list -n supabase | grep -q supabase-kong; then
+  echo "  Kong release exists, upgrading..."
+else
+  echo "  Creating new Kong release..."
+fi
+helm upgrade --install supabase-kong kong/kong -n supabase -f "$MANIFESTS_DIR/kong-values.yaml" --wait --timeout=5m || { echo "Kong install failed. Check logs: kubectl logs -n supabase deploy/supabase-kong"; exit 1; }
 
 echo "Deploying Supabase services and ClusterIP services..."
 kubectl apply -k "$MANIFESTS_DIR/"
