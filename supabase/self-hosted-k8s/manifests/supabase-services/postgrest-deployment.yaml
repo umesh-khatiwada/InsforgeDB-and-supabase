@@ -18,11 +18,19 @@ spec:
           image: postgrest/postgrest:latest
           env:
             - name: PGRST_DB_URI
-              value: "postgres://supabase:<POSTGRES_PASSWORD>@supabase-postgres:5432/supabase"
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: POSTGRES_URI
             - name: PGRST_DB_SCHEMA
               value: "public"
             - name: PGRST_DB_ANON_ROLE
               value: "anon"
+            - name: PGRST_DB_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: POSTGREST_JWT_SECRET
           ports:
             - containerPort: 3000
           resources:

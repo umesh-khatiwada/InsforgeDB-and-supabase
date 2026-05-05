@@ -24,6 +24,9 @@ spec:
             - name: DB_USER
               value: "supabase"
             - name: DB_PASSWORD
-              value: "<POSTGRES_PASSWORD>"
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: POSTGRES_PASSWORD
           ports:
             - containerPort: 4000

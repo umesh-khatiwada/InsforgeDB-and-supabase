@@ -1,8 +1,8 @@
 # Example Helm values for MinIO (for Supabase Storage)
-accessKey: <MINIO_ACCESS_KEY>
-secretKey: <MINIO_SECRET_KEY>
+accessKey: minioaccesskey12345
+secretKey: miniosecretkey9Z8y7X6w5V4u3T2s
 persistence:
-  enabled: true
+  enabled: false
   size: 50Gi
   storageClass: ""
 resources:

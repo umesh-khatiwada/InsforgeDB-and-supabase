@@ -4,3 +4,5 @@ resources:
   - minio-values.yaml
   - kong-values.yaml
   - supabase-services/
+  - secrets.yaml
+  - services.yaml

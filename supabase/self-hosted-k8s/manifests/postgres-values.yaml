@@ -2,12 +2,12 @@
 # Customize storageClass, resources, and credentials for production
 global:
   postgresql:
-    postgresqlPassword: <POSTGRES_PASSWORD>
+    postgresqlPassword: p5sW0rdX9Gh7Kq2LmV4zTt
     postgresqlDatabase: supabase
     postgresqlUsername: supabase
 primary:
   persistence:
-    enabled: true
+    enabled: false
     size: 10Gi
     storageClass: ""
 metrics:
