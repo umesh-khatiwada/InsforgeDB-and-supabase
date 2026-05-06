@@ -22,3 +22,26 @@ Insforge is the application layer in this setup. Use this folder to document the
 4. Development workflow
 5. Common tasks
 6. Deployment
+
+## Self-hosted Docker
+
+Use this flow to run Insforge on a machine with Docker and Docker Compose installed.
+
+1. Clone the repository.
+
+	```bash
+	git clone https://github.com/insforge/insforge.git
+	cd insforge
+	```
+
+2. Create the environment file.
+
+	```bash
+	cp .env.example .env
+	```
+
+3. Start the stack.
+
+	```bash
+	docker compose up
+	```
